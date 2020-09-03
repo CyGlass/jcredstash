@@ -14,6 +14,7 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -55,6 +56,14 @@ public class JCredStash {
 
         protected static byte[] hexAttributeValueToBytes(AttributeValue value) {
             try {
+                // Check if the String for the value exists
+                if (value.getS() == null) {
+                    if (value.getB() == null) {
+                        throw new RuntimeException("No valid value to decode.");
+                    }
+                    // use the BytBuffer from the AttributeValue to construct a String and pass as charArray to Hex.decodeHex
+                    return Hex.decodeHex(new String(value.getB().array(),StandardCharsets.UTF_8).toCharArray());
+                }
                 return Hex.decodeHex(value.getS().toCharArray());
             } catch (DecoderException e) {
                 throw new RuntimeException(e);
